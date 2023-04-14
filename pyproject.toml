@@ -5,6 +5,7 @@ strict = true
 name = "sftp_to_afs"
 version = "0.1.0"
 description = "Copy files from a SFTP server to an Azure File Share"
+authors = ["colduck"]
 readme = "README.md"
 packages = [{include = "sftp_to_afs"}]
 
