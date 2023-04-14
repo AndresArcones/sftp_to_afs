@@ -1,7 +1,7 @@
 import os
 from os.path import isfile, join
 from paramiko import Transport, SFTPClient
-from stat import S_ISREG
+from stat import S_ISREG, S_ISDIR
 from sftp_to_afs.logger.logger import Logger
 from sftp_to_afs.utils.set import insert_in_set
 
@@ -33,9 +33,9 @@ class SftpClient:
         if not self.client:
             raise Exception("sftp client can't be 'None'")
 
-        # get a list of the files in the remote directory
-        remote_file_list = [file.filename for file in self.client.listdir_attr(remote_path)
-                                   if S_ISREG(file.st_mode)]
+        # get a list of the files in the remote directory (It can be files or directories)
+        remote_file_list = [file for file in self.client.listdir_attr(remote_path)]
+
         if remote_file_list:
             # create the local directory if not present
             if not os.path.exists(local_path):
@@ -45,18 +45,28 @@ class SftpClient:
             local_file_list = set([f for f in os.listdir(local_path)
                                    if isfile(join(local_path, f))])
 
-            for file_name in remote_file_list:
+            for file in remote_file_list:
                 # if not yet in local directory download the file
-                if (insert_in_set(local_file_list, file_name)):
-                    remote_file = os.path.join(remote_path, file_name)
-                    local_file = os.path.join(local_path, file_name)
+                if file.st_mode and S_ISREG(file.st_mode) and insert_in_set(
+                        local_file_list, file.filename):
+
+                    remote_file = os.path.join(remote_path, file.filename)
+                    local_file = os.path.join(local_path, file.filename)
                     self.client.get(remote_file, local_file)
 
                     files_downloaded = True
 
-                    log = f"Copied '{file_name}' from '{remote_path}' to '{local_path}'."
+                    log = f"Copied '{file.filename}' from '{remote_path}' to '{local_path}'."  # noqa
                     self.logger.info(log)
                     print(log)
+
+                elif file.st_mode and S_ISDIR(file.st_mode):
+                    self.download_files(
+                        os.path.join(
+                            remote_path, file.filename),
+                        os.path.join(
+                            local_path, file.filename)
+                    )
 
         # log when no files are downloaded because already present in the local
         if not files_downloaded:
