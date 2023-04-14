@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Colduck/sftp_to_afs/compare/v1.0.0...v1.1.0) (2023-04-14)
+
+
+### Features
+
+* add recursive copy of files and directories ([c523be0](https://github.com/Colduck/sftp_to_afs/commit/c523be01ab89eda1e89af5bcd8f0da5d382f5019))
+
 # 1.0.0 (2023-04-05)
 
 
