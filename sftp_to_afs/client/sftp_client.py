@@ -36,7 +36,6 @@ class SftpClient:
         # get a list of the files in the remote directory
         remote_file_list = [file.filename for file in self.client.listdir_attr(remote_path)
                                    if S_ISREG(file.st_mode)]
-        print(remote_file_list)
         if remote_file_list:
             # create the local directory if not present
             if not os.path.exists(local_path):
